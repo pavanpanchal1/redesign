@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Modern and Colorful AnnotatedTimeline Chart - Chart.js</title>
+  <!-- Load the Chart.js library -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+  <canvas id="chartCanvas" width="800" height="400"></canvas>
+
+  <script type="text/javascript">
+    // Dummy data for testing purposes
+    var ajaxresponse = "Date^^Category 1^^Category 2^^Category 3^##^2023,7,1^^10^^20^^30^*^2023,7,2^^15^^25^^35^*^2023,7,3^^18^^28^^38^*^";
+
+    drawChart(ajaxresponse);
+
+    function drawChart(datafortimeline) {
+      var mainStrings = datafortimeline.split("^#*#^");
+      var headingsFormats = mainStrings[0];
+      var tableValues = mainStrings[1];
+
+      var headingsFormat = headingsFormats.split("^##^");
+      var totalColumns = headingsFormat.length;
+
+      var data = {
+        labels: [],
+        datasets: []
+      };
+
+      var tableLine = tableValues.split("^##^");
+      var totalRows = parseInt(tableLine.length);
+
+      var lineValues;
+      for (row = 0; row < totalRows; row++) {
+        lineValues = tableLine[row].split("^*^");
+        var dateValue = lineValues[0].split("^^");
+        data.labels.push(new Date(dateValue[0], dateValue[1], dateValue[2]));
+
+        for (column = 1; column < totalColumns; column++) {
+          if ((column + 2) % 3 == 0)
+            lineValues[column] = parseInt(lineValues[column]);
+
+          if (!data.datasets[column - 1]) {
+            data.datasets[column - 1] = {
+              label: headingsFormat[column].split("^*^")[0],
+              data: [lineValues[column]],
+              borderColor: ['#3366cc', '#dc3912', '#ff9900', '#109618', '#990099', '#0099c6', '#dd4477', '#66aa00'][column - 1] || 'blue',
+              borderWidth: 2,
+              fill: false,
+              spanGaps: true
+            };
+          } else {
+            data.datasets[column - 1].data.push(lineValues[column]);
+          }
+        }
+      }
+
+      var ctx = document.getElementById('chartCanvas').getContext('2d');
+      var chart = new Chart(ctx, {
+        type: 'line',
+        data: data,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top',
+              labels: {
+                font: {
+                  size: 14,
+                  family: 'Arial',
+                  color: '#333'
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              type: 'time',
+              time: {
+                unit: 'day'
+              },
+              ticks: {
+                font: {
+                  size: 12,
+                  family: 'Arial',
+                  color: '#333'
+                }
+              }
+            },
+            y: {
+              ticks: {
+                font: {
+                  size: 12,
+                  family: 'Arial',
+                  color: '#333'
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+
+</html>
